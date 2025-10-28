@@ -1,0 +1,20 @@
+% !TEX root = ./manual.tex
+%%
+% Maintainer
+% @author Thomas Lehmann
+%
+\section{Bekannte Probleme}\label{sec:knownissues}\index{Bugs}
+Derzeit sind folgende Problem bekannt, zu denen nur Work Arounds existieren.
+
+\subsection{Font-Größe auf dem Deckblatt}
+Die Font-Größe auf dem Deckblatt passt sich automatisch an. Dabei wird eine Heuristik eingesetzt. Somit kann es passieren, dass die Font-Größe nicht optimal ist.
+
+Lösung: Die Font-Größe muss direkt in der Datei coverpage.tex gesetzt werden.
+
+\subsection{Lorem Ipsum}
+Bei einigen \LaTeX -Distributionen fehlt das Paket lipsum, welches Beispieltexte für das Beispiel liefert. Aufgetreten auf  Ubunto 18 Systemen.
+
+Lösung: Das Paket aus dem Style-File durch löschen der Zeile herausnehmen. Das Beispiel kann dann nicht verwendet werden. Auf das Template hat es keinen Einfluss.
+
+\subsection{Literaturverzeichnis wird aus IDE nicht erstellt}
+Einige IDEs für \LaTeX haben das Bibliothekssystem Biber statt BibTex eingestellt. Dann wird im Compil-Vorgang kein Literaturverzeichnis erzeugt. Compil-Vorgang muss in der IDE angepasst oder in der Shell manuell ausgeführt werden.

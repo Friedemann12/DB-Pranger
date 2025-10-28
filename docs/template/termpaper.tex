@@ -1,0 +1,84 @@
+\documentclass[
+  a4paper,            % DIN A4
+  DIV=10,             % Schriftgröße und Satzspiegel
+  oneside,            % einseitiger Druck
+  BCOR=5mm,           % Bindungskorrektur
+  parskip=half,       % Halber Abstand zwischen Absätzen
+  numbers=noenddot,   % Kein Punkt hinter Kapitelnummern
+  bibtotoc,           % Literaturverzeichnis im Inhaltsverzeichnis
+  listof=totoc        % Abbildungs- und Tabellenverzeichnis im Inhaltsverzeichnis
+]{scrartcl}
+\usepackage{../style/termpaperstyle}
+\usepackage{float}
+\usepackage{listings}
+%\usepackage{layout}       % Layout Debugging
+%\usepackage{showframe}    % Layout Debugging
+\usepackage{lipsum}       % for example only
+\usepackage{blindtext}    % for example only
+\usepackage{graphicx}   % for example only
+
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+
+\geometry{margin=2.5cm}
+
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, shadows}
+
+% Custom colors
+\definecolor{primaryblue}{RGB}{0,102,204}
+\definecolor{lightblue}{RGB}{135,206,235}
+\definecolor{orange}{RGB}{255,165,0}
+\definecolor{lightgreen}{RGB}{144,238,144}
+\definecolor{lightyellow}{RGB}{255,255,224}
+
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+\sisetup{locale = DE}     % siunitx locale setup
+\begin{document}
+\input{configuration/configuration}    % load all settings
+
+%\layout{}                 % Layout Debugging
+
+\hyphenation{Ba-che-lor-the-sis Mas-ter-the-sis}
+
+% Cover page here, no page number
+\ICoverPage
+
+% PDF Metadata
+\input{../style/metadata}
+
+% Titlepage is page one even if the number is not shown.
+\pagenumbering{roman}
+
+% Table of contents here
+\newpage
+% \tableofcontents
+
+% Uncomment if list of source code is needed (rarely).
+%\lstlistoflistings  % requires package listings, needs to uncommenting of usepackage
+
+% path to the chapters folder is set to find the images used there
+\graphicspath{ {./chapters/} }
+
+% Chapters
+\clearpage
+\pagenumbering{arabic}
+
+%\begin{abstract}
+%\input{chapters/paperabstract}
+%\end{abstract}
+
+%\ITextBlockKeywords
+
+\input{docs/template/chapters/praktikum1}
+% Add additional chapters here
+
+%\bibliographystyle{plain}
+%\bibliographystyle{dinat}
+%\bibliography{literature}
+
+% \Istatement
+
+\end{document}

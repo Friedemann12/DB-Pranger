@@ -1,0 +1,85 @@
+% !TEX root = ../termpaper.tex
+% first example section
+% @author Thomas Lehmann
+%
+
+\section{Praktikum 1}
+\subsection{Idee}
+\textbf{Ansatz:} 
+\begin{itemize}[itemsep=0.2em]
+    \item Live-Monitoring von Verspätungen (10s-Updates)
+    \item Historische Analyse über 14 Jahre Fahrplandaten
+    \item Kombination beider für Prognosen
+\end{itemize}
+
+\textbf{Big Data durch:}
+\begin{itemize}[itemsep=0.2em]
+    \item Volume: Potenziell 750+ GB historische Daten
+    \item Velocity: Streaming alle 10 Sekunden
+    \item Variety: Protocol Buffers, CSV, Parquet
+\end{itemize}
+
+\textbf{Offene Fragen:}
+\begin{itemize}[itemsep=0.2em]
+    \item Welche konkreten Analysen/Metriken? (z.\,B. \glqq Durchschnittsverspätung pro Linie\grqq?)
+    \item Wie detailliert soll das Dashboard werden?
+\end{itemize}
+
+
+
+\subsection{Aufbau}
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm,
+    box/.style={rectangle, rounded corners, draw=black, thick, minimum width=3.5cm, minimum height=1.2cm, align=center, font=\small\bfseries},
+    databox/.style={box, fill=lightgreen!50},
+    processbox/.style={box, fill=lightblue!50},
+    storagebox/.style={box, fill=orange!30},
+    arrow/.style={-{Stealth[length=3mm]}, thick}
+]
+
+% Left: Data Sources
+\node[databox] (gtfs) at (0,2) {GTFS Realtime\\{\tiny alle 10s}};
+\node[databox] (vbb) at (0,0) {VBB Archiv\\{\tiny 2010--2024}};
+
+% Center: Node 1
+\node[processbox] (kafka) at (4.5,1) {Node 1: Kafka\\{\tiny Message Broker}\\{\tiny Topics + Partitions}};
+
+% Right: Node 2
+\node[processbox] (spark) at (9,2) {Node 2: Spark\\{\tiny Stream Processing}};
+\node[storagebox] (minio) at (9,0) {MinIO Storage\\{\tiny Parquet-Dateien}};
+
+% Far right: Output
+\node[box, fill=red!30] (grafana) at (13,1) {Grafana\\Dashboard};
+
+% Arrows
+\draw[arrow, green!60!black] (gtfs.east) -- (kafka.west);
+\draw[arrow, orange!80!black] (vbb.east) -- (kafka.west);
+\draw[arrow, blue] (kafka.east) -- (spark.west);
+\draw[arrow, purple] (spark.south) -- (minio.north);
+\draw[arrow, red] (spark.east) -- (grafana.west);
+\draw[arrow, red, dashed] (minio.east) -- (grafana.west);
+
+% Node boxes
+\draw[dashed, gray, thick] (3,3.2) rectangle (6,-0.8);
+\draw[dashed, gray, thick] (7.5,3.2) rectangle (10.5,-0.8);
+
+\node[above, font=\footnotesize] at (4.5,3.2) {Data Hub};
+\node[above, font=\footnotesize] at (9,3.2) {Processing};
+
+\end{tikzpicture}
+\caption{Verteilte 2-Node-Architektur: Kafka als zentraler Message Broker, Spark für die Verarbeitung}
+\end{figure}
+
+Die Systemarchitektur basiert auf der Lambda-Architektur mit zwei Nodes. Node 1 fungiert als zentraler Data Hub und hostet Apache Kafka als Message Broker. Hier werden alle eingehenden Datenströme über verschiedene Topics verteilt, wobei Partitionierung für Parallelität sorgt. Die Live-Daten von GTFS Realtime fließen alle 10 Sekunden in dedizierte Topics, während historische Daten aus dem VBB-Archiv ebenfalls über Kafka geroutet werden.
+Node 2 übernimmt die Verarbeitung durch Apache Spark. Die Spark-Instanz konsumiert kontinuierlich Messages aus Kafka, führt Aggregationen und Transformationen durch und persistiert Ergebnisse im MinIO. Grafana greift sowohl auf die Stream-Ergebnisse als auch auf historische Daten aus dem MinIO zu und visualisiert diese im Dashboard.
+
+\subsection{Umsetzung}
+Zunächst wollen wir mithilfe eines Prototyps testen, ob das GTFS-Format unseren Erwartungen entspricht und ob wir erste Datenströme verarbeiten können. Anschließend beginnen wir mit dem Basisaufbau der Infrastruktur mit Kafka und Spark auf beiden Nodes.
+
+Dabei implementieren wir zwei wesentliche Komponenten. Einerseits gibt es die Realtime-Komponente, die kontinuierlich Live-Daten streamt und verarbeitet. Hier planen wir, über die Weihnachtszeit ausreichend Daten zu sammeln, wie es die VL verlangt. Die zweite Komponente ist die Batch-Verarbeitung des historischen Archivs, bei der wir große historische Daten aufbereiten und speichern wollen.
+
+Die Ergebnisse sollen im Grafana-Dashboard visualisiert werden. Durch Grafan sparen wir uns den Aufwand für eine Neuentwicklung und können das Dashboard schnell erstellen.
+Falls es die Zeit erlaubt, wollen wir eine optionale Komponente für Prognosen hinzufügen.
+
