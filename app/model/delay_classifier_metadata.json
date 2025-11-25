@@ -1,0 +1,46 @@
+{
+  "model_type": "RandomForestClassifier",
+  "feature_columns": [
+    "hour_of_day",
+    "day_of_week",
+    "is_rush_hour",
+    "is_weekend",
+    "temperature_c",
+    "precipitation_mm",
+    "wind_speed_kmh",
+    "weather_code",
+    "humidity_percent",
+    "cloud_cover_percent",
+    "line_idx",
+    "vehicle_type_idx",
+    "line_type_idx",
+    "direction_idx"
+  ],
+  "target": "delay > 2 min",
+  "metrics": {
+    "accuracy": 0.9714285714285714,
+    "precision": 0.6666666666666666,
+    "recall": 1.0,
+    "f1": 0.8,
+    "delay_threshold": 2
+  },
+  "feature_importance": {
+    "hour_of_day": 0.0,
+    "day_of_week": 0.0,
+    "is_rush_hour": 0.0,
+    "is_weekend": 0.0,
+    "temperature_c": 0.0,
+    "precipitation_mm": 0.0,
+    "wind_speed_kmh": 0.0,
+    "weather_code": 0.0,
+    "humidity_percent": 0.0,
+    "cloud_cover_percent": 0.0,
+    "line_idx": 0.21772074600190097,
+    "vehicle_type_idx": 0.1433473448879284,
+    "line_type_idx": 0.2079120198673985,
+    "direction_idx": 0.43101988924277207
+  },
+  "training_date": "2025-11-25T14:11:48.744136",
+  "training_samples": 136,
+  "test_samples": 35
+}

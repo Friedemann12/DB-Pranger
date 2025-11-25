@@ -1,0 +1,44 @@
+{
+  "model_type": "RandomForestRegressor",
+  "feature_columns": [
+    "hour_of_day",
+    "day_of_week",
+    "is_rush_hour",
+    "is_weekend",
+    "temperature_c",
+    "precipitation_mm",
+    "wind_speed_kmh",
+    "weather_code",
+    "humidity_percent",
+    "cloud_cover_percent",
+    "line_idx",
+    "vehicle_type_idx",
+    "line_type_idx",
+    "direction_idx"
+  ],
+  "target": "delay_minutes",
+  "metrics": {
+    "mae": 0.3116139286136407,
+    "rmse": 0.7647024125133857,
+    "r2": 0.3511386049482379
+  },
+  "feature_importance": {
+    "hour_of_day": 0.0,
+    "day_of_week": 0.0,
+    "is_rush_hour": 0.0,
+    "is_weekend": 0.0,
+    "temperature_c": 0.0,
+    "precipitation_mm": 0.0,
+    "wind_speed_kmh": 0.0,
+    "weather_code": 0.0,
+    "humidity_percent": 0.0,
+    "cloud_cover_percent": 0.0,
+    "line_idx": 0.13201567870343472,
+    "vehicle_type_idx": 0.11850697237343848,
+    "line_type_idx": 0.1747175019177743,
+    "direction_idx": 0.5747598470053525
+  },
+  "training_date": "2025-11-25T14:11:48.735614",
+  "training_samples": 136,
+  "test_samples": 35
+}

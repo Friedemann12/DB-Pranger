@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.venv
+venv
+env
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Data files (don't include in image)
+*.jsonl
+*.parquet
+*.pkl
+
+# Docs
+docs/
+*.md
+*.pdf
+
+# Model files
+app/model/
+
+# Local env
+.env
+.env.local
+

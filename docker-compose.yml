@@ -1,0 +1,17 @@
+# Docker Compose for local testing
+# Run with: docker-compose up
+
+version: '3.8'
+
+services:
+  transport-collector:
+    build: .
+    container_name: geofox-collector
+    restart: unless-stopped
+    environment:
+      - GTI_USER=${GTI_USER}
+      - GTI_PASSWORD=${GTI_PASSWORD}
+    volumes:
+      # Persist collected data to host
+      - ./data:/app/data
+

@@ -7,6 +7,9 @@ import json
 import time
 import uuid
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 GTI_USER = os.getenv("GTI_USER")
 GTI_PASSWORD = os.getenv("GTI_PASSWORD")
