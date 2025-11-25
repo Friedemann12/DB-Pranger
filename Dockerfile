@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir \
     python-dotenv>=1.0.0
 
 # Copy only the data ingestion script
-COPY app/data_ingestion/create_history.py /app/create_history.py
+COPY /app/data_ingestion/create_history.py create_history.py
 
 # Create data directory for output files
 RUN mkdir -p /app/data

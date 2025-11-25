@@ -1,0 +1,2078 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   DB Pranger - Paper-Style Minimalist Theme
+   Smooth, muted colors - like ink on paper
+   ============================================================================ */
+
+:root {
+  /* Light Mode - Warm Paper */
+  --background: #faf8f5;
+  --background-card: #ffffff;
+  --background-subtle: #f5f2ed;
+  --foreground: #1a1a1a;
+  --foreground-muted: #6b6b6b;
+  --foreground-soft: #8a8a8a;
+  --border: #e8e4dd;
+  --border-subtle: #f0ece5;
+  
+  /* Status Colors - Muted, Paper-like */
+  --status-good: #3d8c6b;
+  --status-good-bg: #e8f5ed;
+  --status-warning: #b8860b;
+  --status-warning-bg: #fdf6e3;
+  --status-critical: #c44536;
+  --status-critical-bg: #fdeae8;
+  --accent: #5c7a99;
+  --accent-bg: #eef3f7;
+  
+  /* Ink effect */
+  --ink: #2c2c2c;
+  --ink-light: #4a4a4a;
+  
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  /* Dark Mode - Soft Charcoal */
+  --background: #1a1a1a;
+  --background-card: #242424;
+  --background-subtle: #2a2a2a;
+  --foreground: #e8e4dd;
+  --foreground-muted: #9a9590;
+  --foreground-soft: #6b6560;
+  --border: #3a3835;
+  --border-subtle: #2f2d2a;
+  
+  /* Status Colors - Softer for dark */
+  --status-good: #6ab894;
+  --status-good-bg: #1e2d25;
+  --status-warning: #d4a84b;
+  --status-warning-bg: #2d2718;
+  --status-critical: #e07565;
+  --status-critical-bg: #2d1f1c;
+  --accent: #7fa3c4;
+  --accent-bg: #1e2630;
+  
+  /* Ink effect */
+  --ink: #e8e4dd;
+  --ink-light: #c4c0b8;
+  
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), 'SF Pro Display', system-ui, -apple-system, sans-serif;
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================================================
+   TikTok-Style Scroll Container
+   ============================================================================ */
+
+.feed-container {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.feed-container::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.feed-container:focus {
+  outline: none;
+}
+
+/* Make carousels focusable but without visible outline */
+.prediction-carousel:focus,
+.journey-carousel:focus,
+.line-carousel:focus {
+  outline: none;
+}
+
+.feed-card {
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 2rem;
+  background: var(--background);
+  transition: background-color 0.3s ease;
+}
+
+/* ============================================================================
+   Card Backgrounds - Subtle gradients
+   ============================================================================ */
+
+.card-bg-good {
+  background: 
+    radial-gradient(ellipse at 50% 30%, var(--status-good-bg) 0%, transparent 60%),
+    var(--background);
+}
+
+.card-bg-warning {
+  background: 
+    radial-gradient(ellipse at 50% 30%, var(--status-warning-bg) 0%, transparent 60%),
+    var(--background);
+}
+
+.card-bg-critical {
+  background: 
+    radial-gradient(ellipse at 50% 30%, var(--status-critical-bg) 0%, transparent 60%),
+    var(--background);
+}
+
+.card-bg-neutral {
+  background: 
+    radial-gradient(ellipse at 50% 30%, var(--accent-bg) 0%, transparent 60%),
+    var(--background);
+}
+
+/* ============================================================================
+   Typography - Clean, Readable
+   ============================================================================ */
+
+.display-huge {
+  font-size: clamp(4.5rem, 18vw, 10rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.display-large {
+  font-size: clamp(1.75rem, 6vw, 4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.display-medium {
+  font-size: clamp(1.25rem, 3.5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.text-muted {
+  color: var(--foreground-muted);
+}
+
+.text-soft {
+  color: var(--foreground-soft);
+}
+
+.text-good { color: var(--status-good); }
+.text-warning { color: var(--status-warning); }
+.text-critical { color: var(--status-critical); }
+.text-accent { color: var(--accent); }
+
+/* ============================================================================
+   Status Styling - No harsh glows, subtle emphasis
+   ============================================================================ */
+
+.status-good {
+  color: var(--status-good);
+}
+
+.status-warning {
+  color: var(--status-warning);
+}
+
+.status-critical {
+  color: var(--status-critical);
+  animation: gentle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+/* ============================================================================
+   Vehicle Type Pills
+   ============================================================================ */
+
+.vehicle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--foreground-muted);
+  transition: all 0.2s ease;
+}
+
+/* ============================================================================
+   Progress Bar - Paper texture feel
+   ============================================================================ */
+
+.delay-bar {
+  width: 100%;
+  max-width: 280px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.delay-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.delay-bar-fill.good { background: var(--status-good); }
+.delay-bar-fill.warning { background: var(--status-warning); }
+.delay-bar-fill.critical { background: var(--status-critical); }
+
+/* ============================================================================
+   Fixed Header (Minimal & Clean)
+   ============================================================================ */
+
+.minimal-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(
+    to bottom, 
+    var(--background) 0%, 
+    var(--background) 60%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.minimal-header > * {
+  pointer-events: auto;
+}
+
+/* ============================================================================
+   Theme Toggle Button
+   ============================================================================ */
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--background-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--foreground-muted);
+}
+
+.theme-toggle:hover {
+  border-color: var(--foreground-muted);
+  background: var(--background-subtle);
+}
+
+/* ============================================================================
+   Scroll Indicator
+   ============================================================================ */
+
+.scroll-indicator {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--foreground-soft);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  animation: float 2.5s ease-in-out infinite;
+  z-index: 50;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+  50% { transform: translateX(-50%) translateY(-8px); opacity: 1; }
+}
+
+.scroll-indicator svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+/* ============================================================================
+   Side Progress Dots
+   ============================================================================ */
+
+.progress-dots {
+  position: fixed;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  z-index: 50;
+}
+
+.progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.progress-dot.active {
+  background: var(--foreground);
+  transform: scale(1.4);
+}
+
+.progress-dot:hover:not(.active) {
+  background: var(--foreground-muted);
+  transform: scale(1.2);
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.15s; }
+.stagger-3 { animation-delay: 0.25s; }
+.stagger-4 { animation-delay: 0.35s; }
+
+/* ============================================================================
+   Loading State
+   ============================================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--border-subtle) 0%,
+    var(--border) 50%,
+    var(--border-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================================================
+   Weather Widget (Compact)
+   ============================================================================ */
+
+.weather-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+}
+
+/* ============================================================================
+   Stats Row
+   ============================================================================ */
+
+.stats-row {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foreground-soft);
+  margin-bottom: 0.375rem;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* ============================================================================
+   Button Styles
+   ============================================================================ */
+
+.btn-subtle {
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-subtle:hover {
+  background: var(--background-card);
+  border-color: var(--foreground-muted);
+}
+
+/* ============================================================================
+   Live Indicator
+   ============================================================================ */
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foreground-muted);
+}
+
+.live-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+}
+
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--status-good);
+  animation: live-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.live-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--status-good);
+}
+
+@keyframes live-ping {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* ============================================================================
+   Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .feed-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .display-huge {
+    font-size: clamp(3.5rem, 16vw, 7rem);
+  }
+  
+  .stats-row {
+    gap: 1.75rem;
+  }
+  
+  .progress-dots {
+    right: 0.75rem;
+  }
+  
+  .minimal-header {
+    padding: 0.875rem 1rem;
+  }
+}
+
+/* ============================================================================
+   Print styles (just in case)
+   ============================================================================ */
+
+@media print {
+  .feed-container {
+    height: auto;
+    overflow: visible;
+  }
+  
+  .feed-card {
+    height: auto;
+    min-height: 100vh;
+    page-break-after: always;
+  }
+  
+  .minimal-header,
+  .progress-dots,
+  .scroll-indicator {
+    display: none;
+  }
+}
+
+/* ============================================================================
+   Time Heatmap
+   ============================================================================ */
+
+.heatmap-container {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.heatmap-row {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.heatmap-header {
+  margin-bottom: 4px;
+}
+
+.heatmap-day-label {
+  width: 28px;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--foreground-soft);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.heatmap-hour-label {
+  flex: 1;
+  text-align: center;
+  font-size: 0.6rem;
+  color: var(--foreground-soft);
+}
+
+.heatmap-cell {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  min-width: 10px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.3);
+  z-index: 10;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.heatmap-legend-gradient {
+  width: 100px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--status-good),
+    var(--status-warning),
+    var(--status-critical)
+  );
+}
+
+/* ============================================================================
+   Line Heatmap / Pill Grid
+   ============================================================================ */
+
+.line-group {
+  padding: 0 0.5rem;
+}
+
+.line-pill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.line-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--background-card);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.line-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.line-pill-name {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.line-pill-delay {
+  font-size: 0.65rem;
+  color: var(--foreground-muted);
+}
+
+.line-pill-good {
+  border-color: var(--status-good);
+  background: var(--status-good-bg);
+}
+
+.line-pill-warning {
+  border-color: var(--status-warning);
+  background: var(--status-warning-bg);
+}
+
+.line-pill-critical {
+  border-color: var(--status-critical);
+  background: var(--status-critical-bg);
+}
+
+.bg-good { background: var(--status-good); }
+.bg-warning { background: var(--status-warning); }
+.bg-critical { background: var(--status-critical); }
+
+/* ============================================================================
+   Predictions Card
+   ============================================================================ */
+
+.prediction-context {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.context-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-width: 80px;
+}
+
+.predictions-list {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.prediction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.prediction-item:hover {
+  border-color: var(--foreground-soft);
+}
+
+.prediction-item-good { border-left: 3px solid var(--status-good); }
+.prediction-item-warning { border-left: 3px solid var(--status-warning); }
+.prediction-item-critical { border-left: 3px solid var(--status-critical); }
+
+/* ============================================================================
+   Prediction Badge (on FeedCard)
+   ============================================================================ */
+
+.prediction-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.prediction-badge-icon {
+  font-size: 1.5rem;
+}
+
+.prediction-badge-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.prediction-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foreground-soft);
+}
+
+.prediction-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.prediction-probability {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+}
+
+/* ============================================================================
+   Show Journeys Button
+   ============================================================================ */
+
+.show-journeys-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.show-journeys-btn:hover {
+  background: var(--background-card);
+  border-color: var(--foreground-muted);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   Journey Carousel
+   ============================================================================ */
+
+.journey-carousel-container {
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.journey-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.journey-carousel {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 0.5rem 1rem;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+
+.journey-carousel.grabbing {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.journey-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.journey-carousel {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.journey-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.375rem;
+  margin-top: 1rem;
+  padding: 0 1rem;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+  background: var(--foreground);
+  transform: scale(1.3);
+}
+
+.carousel-swipe-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+  font-size: 0.65rem;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  animation: swipe-hint-pulse 2s ease-in-out infinite;
+}
+
+@keyframes swipe-hint-pulse {
+  0%, 100% { opacity: 0.5; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(4px); }
+}
+
+/* ============================================================================
+   Journey Slide
+   ============================================================================ */
+
+.journey-slide {
+  flex-shrink: 0;
+  width: 85%;
+  max-width: 320px;
+  scroll-snap-align: center;
+  padding: 1rem;
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.journey-slide:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.journey-slide.active {
+  border-color: var(--foreground-soft);
+}
+
+.journey-slide-good { border-left: 4px solid var(--status-good); }
+.journey-slide-warning { border-left: 4px solid var(--status-warning); }
+.journey-slide-critical { border-left: 4px solid var(--status-critical); }
+
+.journey-slide-skeleton {
+  width: 85%;
+  max-width: 320px;
+  height: 180px;
+  border-radius: 16px;
+}
+
+.journey-slide-status {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.journey-slide-status.good { background: var(--status-good); }
+.journey-slide-status.warning { background: var(--status-warning); }
+.journey-slide-status.critical { background: var(--status-critical); animation: gentle-pulse 2s infinite; }
+
+.journey-slide-route {
+  flex: 1;
+}
+
+.journey-slide-stations {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.station-name {
+  color: var(--foreground);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.route-arrow {
+  color: var(--foreground-soft);
+  flex-shrink: 0;
+}
+
+.journey-slide-delay {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.delay-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.delay-unit {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.journey-slide-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.7rem;
+}
+
+.journey-slide-stats .stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-slide-stats .stat-label {
+  color: var(--foreground-soft);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+.journey-slide-stats .stat-value {
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.journey-slide-hint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 0.6rem;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================================
+   Journey Detail Modal
+   ============================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  background: var(--background);
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--background-card);
+}
+
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--foreground-muted);
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--background-subtle);
+  color: var(--foreground);
+}
+
+.modal-summary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: var(--background-subtle);
+}
+
+.summary-delay {
+  text-align: center;
+}
+
+.summary-delay .delay-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.summary-delay .delay-label {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.summary-delay.delay-good .delay-value { color: var(--status-good); }
+.summary-delay.delay-warning .delay-value { color: var(--status-warning); }
+.summary-delay.delay-critical .delay-value { color: var(--status-critical); }
+
+.summary-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.summary-stats .stat {
+  text-align: center;
+}
+
+.summary-stats .stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.summary-stats .stat-label {
+  font-size: 0.6rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.modal-route {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--background-card);
+  border-bottom: 1px solid var(--border);
+}
+
+.route-endpoint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.route-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+}
+
+.route-dot.start { background: var(--accent); }
+.route-dot.end { background: transparent; }
+
+.route-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--accent),
+    var(--border)
+  );
+  min-width: 40px;
+}
+
+.modal-segments {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.5rem;
+}
+
+.segments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.segment-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.segment-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12px;
+}
+
+.segment-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.segment-dot.good { background: var(--status-good); }
+.segment-dot.warning { background: var(--status-warning); }
+.segment-dot.critical { background: var(--status-critical); }
+
+.segment-connector {
+  flex: 1;
+  width: 2px;
+  background: var(--border);
+  margin-top: 4px;
+  min-height: 20px;
+}
+
+.segment-content {
+  flex: 1;
+}
+
+.segment-stations {
+  font-size: 0.85rem;
+  color: var(--foreground);
+}
+
+.segment-meta {
+  margin-top: 0.25rem;
+}
+
+.segment-delay {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--background-card);
+}
+
+/* Color utility classes */
+.color-good { --color: var(--status-good); }
+.color-good-soft { --color: color-mix(in srgb, var(--status-good) 50%, var(--status-good-bg)); }
+.color-warning { --color: var(--status-warning); }
+.color-warning-soft { --color: color-mix(in srgb, var(--status-warning) 50%, var(--status-warning-bg)); }
+.color-critical { --color: var(--status-critical); }
+
+/* ============================================================================
+   Responsive Modal
+   ============================================================================ */
+
+@media (min-width: 640px) {
+  .modal-container {
+    margin-bottom: 2rem;
+    border-radius: 24px;
+    max-height: 80vh;
+  }
+}
+
+/* ============================================================================
+   Feed Card Wrapper (for journey overlay)
+   ============================================================================ */
+
+.feed-card-wrapper {
+  position: relative;
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+.feed-card-wrapper > .feed-card {
+  height: 100%;
+}
+
+/* Card Observer Wrapper for Intersection Observer tracking */
+.card-observer-wrapper {
+  position: relative;
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: contents; /* Let children take full control of layout */
+}
+
+/* Override: make wrapper visible for observer */
+.card-observer-wrapper {
+  display: block;
+  height: 100vh;
+  width: 100%;
+}
+
+.card-observer-wrapper > * {
+  height: 100%;
+}
+
+.journey-carousel-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    to top,
+    var(--background) 0%,
+    var(--background) 80%,
+    transparent 100%
+  );
+  padding: 1rem 0 2rem;
+  z-index: 20;
+  animation: slide-up-subtle 0.3s ease;
+}
+
+@keyframes slide-up-subtle {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.carousel-close-btn {
+  display: block;
+  margin: 1rem auto 0;
+  padding: 0.5rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: var(--foreground-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.carousel-close-btn:hover {
+  background: var(--background-card);
+  color: var(--foreground);
+}
+
+/* ============================================================================
+   LineCardWithCarousel - Full Screen Horizontal Carousel
+   ============================================================================ */
+
+.line-card-container {
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.line-carousel {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.line-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.line-carousel {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.line-carousel-slide {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.line-overview-slide {
+  text-align: center;
+}
+
+.line-carousel-pagination {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  z-index: 10;
+}
+
+.pagination-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-dot.active {
+  background: var(--foreground);
+  transform: scale(1.3);
+}
+
+.pagination-more {
+  font-size: 0.65rem;
+  color: var(--foreground-soft);
+  margin-left: 0.25rem;
+}
+
+/* Line Overview Slide Styles */
+.prediction-badge-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+}
+
+.prediction-icon {
+  font-size: 1rem;
+}
+
+.prediction-prob {
+  color: var(--foreground-muted);
+  font-size: 0.7rem;
+}
+
+.stats-row-compact {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.stat-compact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-compact .stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.stat-compact .stat-label {
+  font-size: 0.65rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.swipe-hint-right {
+  position: absolute;
+  bottom: 4rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* Journey Slide Full (inside LineCardWithCarousel) */
+.journey-slide-full {
+  width: 100%;
+  height: 100%;
+  background: var(--background-card);
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  transition: background 0.2s ease;
+}
+
+.journey-slide-full:active {
+  background: var(--background-subtle);
+}
+
+.journey-slide-full.journey-good { 
+  background: linear-gradient(180deg, var(--status-good-bg) 0%, var(--background) 50%);
+}
+.journey-slide-full.journey-warning { 
+  background: linear-gradient(180deg, var(--status-warning-bg) 0%, var(--background) 50%);
+}
+.journey-slide-full.journey-critical { 
+  background: linear-gradient(180deg, var(--status-critical-bg) 0%, var(--background) 50%);
+}
+
+.journey-number {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.journey-route-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.route-station {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.route-line-vertical {
+  width: 2px;
+  height: 24px;
+  background: var(--border);
+  margin-left: 5px;
+}
+
+.journey-direction {
+  font-size: 0.75rem;
+  color: var(--foreground-muted);
+  margin-bottom: 0.5rem;
+}
+
+.journey-delay-large {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 1rem 0;
+}
+
+.journey-delay-large .delay-value {
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.journey-delay-large .delay-unit {
+  font-size: 1.25rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.journey-delay-large.good .delay-value { color: var(--status-good); }
+.journey-delay-large.warning .delay-value { color: var(--status-warning); }
+.journey-delay-large.critical .delay-value { color: var(--status-critical); }
+
+.journey-stats-row {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.journey-stats-row .stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.journey-stats-row .value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.journey-stats-row .label {
+  font-size: 0.6rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.tap-hint {
+  font-size: 0.65rem;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 1.5rem;
+  opacity: 0.7;
+}
+
+/* ============================================================================
+   PredictionCarousel
+   ============================================================================ */
+
+.prediction-carousel-container {
+  height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.prediction-carousel {
+  flex: 1;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.prediction-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.prediction-carousel {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.prediction-carousel-slide {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+}
+
+.prediction-carousel-pagination {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  z-index: 10;
+}
+
+.prediction-carousel-pagination .context-dot {
+  width: 10px;
+  height: 10px;
+}
+
+.prediction-empty {
+  text-align: center;
+}
+
+/* Context Slide */
+.context-slide {
+  text-align: center;
+  gap: 1.25rem;
+}
+
+.context-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.context-subtitle {
+  font-size: 0.85rem;
+  color: var(--foreground-muted);
+  margin-top: -0.5rem;
+}
+
+.context-weather-card {
+  background: var(--background-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.weather-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.weather-icon-large {
+  font-size: 3rem;
+}
+
+.weather-temp {
+  display: flex;
+  align-items: flex-start;
+}
+
+.temp-value {
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.temp-unit {
+  font-size: 1.25rem;
+  color: var(--foreground-muted);
+}
+
+.weather-details {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.weather-details .detail {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--foreground-muted);
+}
+
+.detail-icon {
+  font-size: 1rem;
+}
+
+.context-impact {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.context-impact.impact-low {
+  background: var(--status-good-bg);
+  border: 1px solid var(--status-good);
+}
+
+.context-impact.impact-medium {
+  background: var(--status-warning-bg);
+  border: 1px solid var(--status-warning);
+}
+
+.context-impact.impact-high {
+  background: var(--status-critical-bg);
+  border: 1px solid var(--status-critical);
+}
+
+.impact-icon {
+  font-size: 1.5rem;
+}
+
+.impact-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.impact-level {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.impact-desc {
+  font-size: 0.75rem;
+  color: var(--foreground-muted);
+}
+
+.context-time {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.time-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+}
+
+.time-icon {
+  font-size: 1rem;
+}
+
+.rush-hour-badge, .weekend-badge {
+  padding: 0.4rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rush-hour-badge {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+  border: 1px solid var(--status-warning);
+}
+
+.weekend-badge {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.swipe-hint-predictions {
+  font-size: 0.7rem;
+  color: var(--foreground-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 1rem;
+  opacity: 0.7;
+}
+
+/* ============================================================================
+   PredictionDetailSlide
+   ============================================================================ */
+
+.prediction-detail-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.prediction-detail-slide.prediction-good {
+  background: linear-gradient(180deg, var(--status-good-bg) 0%, transparent 40%);
+}
+
+.prediction-detail-slide.prediction-warning {
+  background: linear-gradient(180deg, var(--status-warning-bg) 0%, transparent 40%);
+}
+
+.prediction-detail-slide.prediction-critical {
+  background: linear-gradient(180deg, var(--status-critical-bg) 0%, transparent 40%);
+}
+
+.prediction-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.prediction-icon-large {
+  font-size: 2.5rem;
+}
+
+.prediction-line-info {
+  text-align: left;
+}
+
+.prediction-line-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.prediction-direction {
+  font-size: 0.8rem;
+  color: var(--foreground-muted);
+}
+
+.prediction-badge-new {
+  position: absolute;
+  top: -0.5rem;
+  right: -1rem;
+  background: var(--accent);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.prediction-main {
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.prediction-delay-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.prediction-delay-display .delay-number {
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.prediction-delay-display .delay-unit {
+  font-size: 1.5rem;
+  color: var(--foreground-muted);
+}
+
+.prediction-status-label {
+  font-size: 0.9rem;
+  color: var(--foreground-muted);
+  margin-top: 0.5rem;
+}
+
+.prediction-probability-section {
+  width: 100%;
+  max-width: 280px;
+  margin: 0.5rem 0;
+}
+
+.prob-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.prob-title {
+  font-size: 0.7rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prob-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.prob-bar {
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.prob-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.prob-bar-fill.prob-good { background: var(--status-good); }
+.prob-bar-fill.prob-warning { background: var(--status-warning); }
+.prob-bar-fill.prob-critical { background: var(--status-critical); }
+
+.prob-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+.prediction-comparison {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--background-subtle);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin: 0.5rem 0;
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.comp-label {
+  font-size: 0.6rem;
+  color: var(--foreground-muted);
+  text-transform: uppercase;
+}
+
+.comp-value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.comparison-arrow {
+  font-size: 1.5rem;
+}
+
+.prediction-footer {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.7rem;
+  color: var(--foreground-soft);
+}
+
+.ml-badge {
+  padding: 0.25rem 0.5rem;
+  background: var(--background-subtle);
+  border-radius: 4px;
+}
+
+.confidence {
+  opacity: 0.7;
+}
