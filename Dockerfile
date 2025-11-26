@@ -3,6 +3,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Disable Python output buffering - IMPORTANT for Docker logs!
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
 # Install only the dependencies needed for data ingestion
 RUN pip install --no-cache-dir \
     requests>=2.32.0 \
@@ -21,6 +25,7 @@ WORKDIR /app/data
 # GTI_USER=your_user
 # GTI_PASSWORD=your_password
 
-# Run the collector
-CMD ["python", "/app/create_history.py"]
+# Run the collector with unbuffered output (-u flag as backup)
+CMD ["python", "-u", "/app/create_history.py"]
+
 
