@@ -9,8 +9,10 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     explode, col, avg, max as spark_max, min as spark_min,
     count, sum as spark_sum, when, floor, from_unixtime,
-    hour, dayofweek, collect_list, first, struct, array_agg
+    hour, dayofweek, collect_list, first, struct, array_agg,
+    row_number, desc
 )
+from pyspark.sql.window import Window
 from pyspark.sql.types import (
     StructType, StructField, StringType, IntegerType,
     LongType, BooleanType, ArrayType
@@ -162,6 +164,27 @@ class SparkHistoryManager:
                 StructField("start_timestamp", LongType(), True),
             ]))
     
+    def _get_final_delays_df(self, df=None):
+        """
+        Get only the final (last) segment of each journey.
+        
+        The last segment's delay represents the final delay of the journey,
+        since each segment shows the current delay at that point in time.
+        """
+        if df is None:
+            df = self._df
+        
+        if df.isEmpty():
+            return df
+        
+        # Window to identify the last segment per journey (by timestamp)
+        window = Window.partitionBy("journey_id").orderBy(desc("start_timestamp"))
+        
+        # Add row number and filter to keep only the last segment (row_num = 1)
+        return df.withColumn("_rn", row_number().over(window)) \
+                 .filter(col("_rn") == 1) \
+                 .drop("_rn")
+    
     def get_all_journeys(
         self,
         limit: int = 100,
@@ -196,10 +219,13 @@ class SparkHistoryManager:
     def get_delay_stats(self) -> Dict[str, Any]:
         """
         Calculate overall delay statistics using Spark aggregations.
+        
+        Uses the final delay of each journey (last segment) for calculations,
+        since each segment shows the current delay at that point in time.
         """
         if self._df.isEmpty():
             return {
-                "avg_delay_minutes": 0,
+                "delay_minutes": 0,
                 "max_delay_minutes": 0,
                 "min_delay_minutes": 0,
                 "delayed_percentage": 0,
@@ -207,26 +233,27 @@ class SparkHistoryManager:
                 "total_segments": 0
             }
         
-        # Use Spark aggregations
-        stats = self._df.agg(
+        # Get final delays (last segment per journey)
+        final_delays_df = self._get_final_delays_df()
+        
+        # Use Spark aggregations on final delays
+        stats = final_delays_df.agg(
             avg("delay_minutes").alias("avg_delay"),
             spark_max("delay_minutes").alias("max_delay"),
             spark_min("delay_minutes").alias("min_delay"),
-            count("*").alias("total_segments"),
+            count("*").alias("total_journeys"),
             spark_sum(when(col("delay_minutes") > 2, 1).otherwise(0)).alias("delayed_count")
         ).collect()[0]
         
-        # Count unique journeys
-        total_journeys = self._df.select("journey_id").distinct().count()
-        
-        total_segments = stats["total_segments"] or 0
+        total_segments = self._df.count()
+        total_journeys = stats["total_journeys"] or 0
         delayed_count = stats["delayed_count"] or 0
         
         return {
-            "avg_delay_minutes": round(float(stats["avg_delay"] or 0), 2),
+            "delay_minutes": round(float(stats["avg_delay"] or 0), 2),
             "max_delay_minutes": int(stats["max_delay"] or 0),
             "min_delay_minutes": int(stats["min_delay"] or 0),
-            "delayed_percentage": round((delayed_count / total_segments) * 100, 1) if total_segments > 0 else 0,
+            "delayed_percentage": round((delayed_count / total_journeys) * 100, 1) if total_journeys > 0 else 0,
             "total_journeys": total_journeys,
             "total_segments": total_segments
         }
@@ -234,29 +261,34 @@ class SparkHistoryManager:
     def get_stats_by_line(self) -> List[Dict[str, Any]]:
         """
         Get delay statistics grouped by line using Spark.
+        
+        Uses the final delay of each journey (last segment) for calculations.
         """
         if self._df.isEmpty():
             return []
         
-        # Group by line and aggregate
-        line_stats = self._df.groupBy("line", "vehicle_type", "line_type").agg(
+        # Get final delays (last segment per journey)
+        final_delays_df = self._get_final_delays_df()
+        
+        # Group by line and aggregate final delays
+        line_stats = final_delays_df.groupBy("line", "vehicle_type", "line_type").agg(
             avg("delay_minutes").alias("avg_delay"),
             spark_max("delay_minutes").alias("max_delay"),
-            count("*").alias("total_segments"),
+            count("*").alias("total_journeys"),
             spark_sum(when(col("delay_minutes") > 2, 1).otherwise(0)).alias("delayed_count")
         ).collect()
         
         result = []
         for row in line_stats:
-            avg_delay = float(row["avg_delay"] or 0)
-            total = row["total_segments"] or 0
+            delay = float(row["avg_delay"] or 0)
+            total = row["total_journeys"] or 0
             delayed = row["delayed_count"] or 0
             delayed_pct = (delayed / total) * 100 if total > 0 else 0
             
             # Determine status
-            if avg_delay < 2:
+            if delay < 2:
                 status = "good"
-            elif avg_delay < 5:
+            elif delay < 5:
                 status = "warning"
             else:
                 status = "critical"
@@ -265,15 +297,15 @@ class SparkHistoryManager:
                 "line": row["line"],
                 "vehicle_type": row["vehicle_type"],
                 "line_type": row["line_type"],
-                "avg_delay_minutes": round(avg_delay, 2),
+                "delay_minutes": round(delay, 2),
                 "max_delay_minutes": int(row["max_delay"] or 0),
                 "delayed_percentage": round(delayed_pct, 1),
-                "total_segments": total,
+                "total_journeys": total,
                 "status": status
             })
         
-        # Sort by average delay descending
-        result.sort(key=lambda x: x["avg_delay_minutes"], reverse=True)
+        # Sort by delay descending
+        result.sort(key=lambda x: x["delay_minutes"], reverse=True)
         return result
     
     def get_delays_over_time(
@@ -400,9 +432,10 @@ class SparkHistoryManager:
         limit: int = 50
     ) -> Dict[str, Any]:
         """
-        Get all journeys for a specific line with their segments.
+        Get all journeys for a specific line with their final delay.
         
-        Returns journeys grouped with segment details for carousel display.
+        Returns journeys with the final delay (last segment's delay),
+        since each segment shows the current delay at that point in time.
         """
         if self._df.isEmpty():
             return {"line": line, "journeys": [], "total": 0}
@@ -413,31 +446,43 @@ class SparkHistoryManager:
         if line_df.isEmpty():
             return {"line": line, "journeys": [], "total": 0}
         
-        # Group segments by journey_id
-        journeys_df = line_df.groupBy(
+        # Get final delays (last segment per journey)
+        final_delays_df = self._get_final_delays_df(line_df)
+        
+        # Get journey metadata by grouping all segments
+        journey_meta = line_df.groupBy(
             "journey_id", "line", "direction", "vehicle_type", "line_type"
         ).agg(
-            avg("delay_minutes").alias("avg_delay"),
             spark_max("delay_minutes").alias("max_delay"),
             spark_min("delay_minutes").alias("min_delay"),
             count("*").alias("segment_count"),
             first("start_station").alias("first_station"),
-            spark_max("end_station").alias("last_station"),
             spark_min("start_timestamp").alias("start_time"),
             spark_max("start_timestamp").alias("end_time")
-        ).orderBy(col("avg_delay").desc())
+        )
+        
+        # Join to get final delay and last station from final segment
+        journeys_df = journey_meta.join(
+            final_delays_df.select(
+                col("journey_id").alias("fj_id"),
+                col("delay_minutes").alias("final_delay"),
+                col("end_station").alias("last_station")
+            ),
+            journey_meta.journey_id == col("fj_id"),
+            "left"
+        ).drop("fj_id").orderBy(col("start_time").desc())
         
         total = journeys_df.count()
         journeys = journeys_df.limit(limit).collect()
         
         result = []
         for row in journeys:
-            avg_delay = float(row["avg_delay"] or 0)
+            delay = float(row["final_delay"] or 0)
             
             # Determine status
-            if avg_delay < 2:
+            if delay < 2:
                 status = "good"
-            elif avg_delay < 5:
+            elif delay < 5:
                 status = "warning"
             else:
                 status = "critical"
@@ -448,7 +493,7 @@ class SparkHistoryManager:
                 "direction": row["direction"],
                 "vehicle_type": row["vehicle_type"],
                 "line_type": row["line_type"],
-                "avg_delay_minutes": round(avg_delay, 2),
+                "delay_minutes": round(delay, 2),
                 "max_delay_minutes": int(row["max_delay"] or 0),
                 "min_delay_minutes": int(row["min_delay"] or 0),
                 "segment_count": row["segment_count"],
@@ -487,6 +532,10 @@ class SparkHistoryManager:
         # Get journey metadata from first segment
         first_seg = segments[0]
         
+        # Get final delay from last segment
+        last_seg = segments[-1]
+        final_delay = last_seg["delay_minutes"] or 0
+        
         return {
             "journey_id": journey_id,
             "line": first_seg["line"],
@@ -506,9 +555,7 @@ class SparkHistoryManager:
                 for row in segments
             ],
             "total_segments": len(segments),
-            "avg_delay": round(
-                sum(s["delay_minutes"] or 0 for s in segments) / len(segments), 2
-            ) if segments else 0
+            "final_delay": final_delay
         }
 
 

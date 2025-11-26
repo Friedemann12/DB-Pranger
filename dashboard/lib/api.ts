@@ -56,7 +56,7 @@ export interface HealthResponse {
 }
 
 export interface StatsOverview {
-  avg_delay_minutes: number;
+  delay_minutes: number;
   max_delay_minutes: number;
   min_delay_minutes: number;
   delayed_percentage: number;
@@ -76,10 +76,10 @@ export interface LineStats {
   line: string;
   vehicle_type: string | null;
   line_type: string | null;
-  avg_delay_minutes: number;
+  delay_minutes: number;
   max_delay_minutes: number;
   delayed_percentage: number;
-  total_segments: number;
+  total_journeys: number;
   status: "good" | "warning" | "critical";
 }
 
@@ -177,7 +177,7 @@ export interface Journey {
   direction: string | null;
   vehicle_type: string | null;
   line_type: string | null;
-  avg_delay_minutes: number;
+  delay_minutes: number;
   max_delay_minutes: number;
   min_delay_minutes: number;
   segment_count: number;
@@ -211,7 +211,7 @@ export interface JourneyDetailResponse {
   line_type: string | null;
   segments: JourneySegment[];
   total_segments: number;
-  avg_delay: number;
+  final_delay: number;
 }
 
 // ============================================================================
