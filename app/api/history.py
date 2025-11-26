@@ -5,12 +5,13 @@ Provides functions to query historical delay data for the dashboard.
 Uses Spark for efficient data processing even with local mode.
 """
 
+import logging
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     explode, col, avg, max as spark_max, min as spark_min,
     count, sum as spark_sum, when, floor, from_unixtime,
     hour, dayofweek, collect_list, first, struct, array_agg,
-    row_number, desc
+    row_number, desc, collect_set, concat_ws
 )
 from pyspark.sql.window import Window
 from pyspark.sql.types import (
@@ -21,8 +22,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
+logger = logging.getLogger(__name__)
 
-# Singleton SparkSession
 _spark: Optional[SparkSession] = None
 
 
@@ -38,9 +39,8 @@ def get_spark_session() -> SparkSession:
             .master("local[*]") \
             .getOrCreate()
         
-        # Set log level to reduce noise
         _spark.sparkContext.setLogLevel("WARN")
-        print("Spark session created for Dashboard API")
+        logger.info("Spark session created for Dashboard API")
     
     return _spark
 
@@ -100,15 +100,15 @@ class SparkHistoryManager:
     def __init__(self, data_dir: Optional[str] = None):
         """Initialize with data directory path."""
         if data_dir is None:
-            # /db_pranger/data in Docker
             self.data_dir = Path("/db_pranger/data")
         else:
             self.data_dir = Path(data_dir)
         
-        print(f"Loading data from: {self.data_dir}")
+        logger.info("Loading data from: %s", self.data_dir)
         
         self.spark = get_spark_session()
         self._df = None
+        self._cached_count: Optional[int] = None
         self._load_data()
     
     def _load_data(self):
@@ -142,17 +142,19 @@ class SparkHistoryManager:
                     col("line_type"),
                     col("vehicle_type"),
                     col("segment.startStationName").alias("start_station"),
+                    col("segment.startStationKey").alias("start_station_key"),
                     col("segment.endStationName").alias("end_station"),
+                    col("segment.endStationKey").alias("end_station_key"),
                     col("segment.startDateTime").alias("start_timestamp"),
                     col("segment.realtimeDelay").alias("delay_minutes")
                 ) \
                 .cache()  # Cache for repeated queries
             
-            count = self._df.count()
-            print(f"Loaded {count} segment records via Spark")
+            self._cached_count = self._df.count()
+            logger.info("Loaded %d segment records via Spark", self._cached_count)
             
         except Exception as e:
-            print(f"Error loading data with Spark: {e}")
+            logger.error("Error loading data with Spark: %s", e)
             # Create empty DataFrame with schema
             self._df = self.spark.createDataFrame([], schema=StructType([
                 StructField("journey_id", StringType(), True),
@@ -160,6 +162,10 @@ class SparkHistoryManager:
                 StructField("direction", StringType(), True),
                 StructField("line_type", StringType(), True),
                 StructField("vehicle_type", StringType(), True),
+                StructField("start_station", StringType(), True),
+                StructField("start_station_key", StringType(), True),
+                StructField("end_station", StringType(), True),
+                StructField("end_station_key", StringType(), True),
                 StructField("delay_minutes", IntegerType(), True),
                 StructField("start_timestamp", LongType(), True),
             ]))
@@ -192,21 +198,23 @@ class SparkHistoryManager:
         line: Optional[str] = None,
         vehicle_type: Optional[str] = None
     ) -> Dict[str, Any]:
-        """
-        Get journeys with pagination using Spark.
-        """
+        """Get journeys with pagination using Spark."""
         df = self._df
+        has_filters = line is not None or vehicle_type is not None
         
         if line:
             df = df.filter(col("line") == line)
-        
         if vehicle_type:
             df = df.filter(col("vehicle_type") == vehicle_type)
         
-        total = df.count()
+        total = df.count() if has_filters else (self._cached_count or df.count())
         
-        # Get paginated results
-        journeys = df.limit(offset + limit).collect()[offset:]
+        window = Window.orderBy("start_timestamp")
+        paginated = df.withColumn("_row_num", row_number().over(window)) \
+                      .filter((col("_row_num") > offset) & (col("_row_num") <= offset + limit)) \
+                      .drop("_row_num")
+        
+        journeys = paginated.collect()
         
         return {
             "journeys": [row.asDict() for row in journeys],
@@ -245,7 +253,7 @@ class SparkHistoryManager:
             spark_sum(when(col("delay_minutes") > 2, 1).otherwise(0)).alias("delayed_count")
         ).collect()[0]
         
-        total_segments = self._df.count()
+        total_segments = self._cached_count or self._df.count()
         total_journeys = stats["total_journeys"] or 0
         delayed_count = stats["delayed_count"] or 0
         
@@ -511,6 +519,85 @@ class SparkHistoryManager:
             "limit": limit
         }
     
+    def get_segments_with_delay(self, limit: int = 100, sort_by: str = "avg_delay") -> List[Dict[str, Any]]:
+        """
+        Get aggregated delay statistics for each unique segment.
+        
+        Aggregates all trips on each segment (start_station -> end_station)
+        and calculates average delay, max delay, total trips, and status.
+        
+        Args:
+            limit: Maximum number of segments to return
+            sort_by: Sort order - 'avg_delay', 'max_delay', or 'total_delay'
+        
+        Returns segments sorted by the specified metric (descending).
+        """
+        if self._df.isEmpty():
+            return []
+        
+        # Group by start and end station (using keys for unique identification)
+        segment_stats = self._df.groupBy(
+            "start_station",
+            "start_station_key", 
+            "end_station",
+            "end_station_key"
+        ).agg(
+            avg("delay_minutes").alias("avg_delay"),
+            spark_max("delay_minutes").alias("max_delay"),
+            spark_min("delay_minutes").alias("min_delay"),
+            count("*").alias("total_trips"),
+            spark_sum(when(col("delay_minutes") > 2, 1).otherwise(0)).alias("delayed_count"),
+            spark_sum("delay_minutes").alias("total_delay"),  # Summierte Verspätung
+            collect_set("line").alias("lines_set")
+        )
+        
+        # Sort by specified metric
+        if sort_by == "max_delay":
+            segment_stats = segment_stats.orderBy(desc("max_delay"))
+        elif sort_by == "total_delay":
+            segment_stats = segment_stats.orderBy(desc("total_delay"))
+        else:  # Default: avg_delay
+            segment_stats = segment_stats.orderBy(desc("avg_delay"))
+        
+        segment_stats = segment_stats.limit(limit)
+        
+        rows = segment_stats.collect()
+        
+        result = []
+        for row in rows:
+            avg_delay = float(row["avg_delay"] or 0)
+            total_trips = row["total_trips"] or 0
+            delayed_count = row["delayed_count"] or 0
+            delayed_pct = (delayed_count / total_trips) * 100 if total_trips > 0 else 0
+            
+            # Determine status based on average delay
+            if avg_delay < 2:
+                status = "good"
+            elif avg_delay < 5:
+                status = "warning"
+            else:
+                status = "critical"
+            
+            # Convert lines set to sorted list
+            lines = sorted(list(row["lines_set"])) if row["lines_set"] else []
+            
+            result.append({
+                "start_station": row["start_station"],
+                "start_station_key": row["start_station_key"],
+                "end_station": row["end_station"],
+                "end_station_key": row["end_station_key"],
+                "avg_delay": round(avg_delay, 2),
+                "max_delay": int(row["max_delay"] or 0),
+                "min_delay": int(row["min_delay"] or 0),
+                "total_delay": round(float(row["total_delay"] or 0), 1),  # Summierte Verspätung
+                "total_trips": total_trips,
+                "delayed_percentage": round(delayed_pct, 1),
+                "lines": lines,
+                "status": status
+            })
+        
+        return result
+
     def get_journey_segments(self, journey_id: str) -> Dict[str, Any]:
         """
         Get all segments for a specific journey.

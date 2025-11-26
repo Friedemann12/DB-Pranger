@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useJourneysByLine, useJourneyDetail } from "@/hooks/useDelayData";
 import { LineStats, Journey, JourneySegment } from "@/lib/api";
@@ -288,7 +288,10 @@ function JourneyCard({ journey, shortenId, formatTime, isSelected, onClick }: {
 }) {
   const { segments, isLoading } = useJourneyDetail(isSelected ? journey.journey_id : null);
   const status = journey.status;
-  const summarized = segments.length > 0 ? summarizeSegments(segments) : [];
+  const summarized = useMemo(
+    () => (segments.length > 0 ? summarizeSegments(segments) : []),
+    [segments]
+  );
 
   return (
     <div className={`journey-card journey-card-${status} ${isSelected ? "expanded" : ""}`}>
@@ -344,7 +347,10 @@ export function AllLinesScreen({ lines }: AllLinesScreenProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showJourneysFor, setShowJourneysFor] = useState<LineStats | null>(null);
 
-  const sortedLines = [...lines].sort((a, b) => b.delay_minutes - a.delay_minutes);
+  const sortedLines = useMemo(
+    () => [...lines].sort((a, b) => b.delay_minutes - a.delay_minutes),
+    [lines]
+  );
   const totalSlides = sortedLines.length + 1;
 
   useEffect(() => {

@@ -4,16 +4,15 @@ Weather client for fetching current weather data from Open-Meteo API.
 Provides real-time weather data for Hamburg to use in predictions.
 """
 
+import logging
 import httpx
 from datetime import datetime
 from typing import Dict, Any, Optional
 
+logger = logging.getLogger(__name__)
 
-# Hamburg coordinates
 HAMBURG_LAT = 53.5511
 HAMBURG_LON = 9.9937
-
-# Open-Meteo API endpoint
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 
@@ -59,8 +58,7 @@ async def get_current_weather() -> Dict[str, Any]:
         }
     
     except httpx.HTTPError as e:
-        print(f"Weather API error: {e}")
-        # Return default values on error
+        logger.warning("Weather API error: %s", e)
         return {
             "temperature_c": 10.0,
             "precipitation_mm": 0.0,

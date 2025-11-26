@@ -44,10 +44,13 @@ services:
       # Clean mount paths: host -> /db_pranger/...
       - ./app/model:/db_pranger/app/model:ro
       - ./data:/db_pranger/data:ro
+      - ./app/api/cache:/db_pranger/app/api/cache
     environment:
       - PYTHONUNBUFFERED=1
       - SPARK_DRIVER_MEMORY=1g
       - SPARK_LOCAL_DIRS=/tmp/spark
+      - GTI_USER=${GTI_USER}
+      - GTI_PASSWORD=${GTI_PASSWORD}
     deploy:
       resources:
         limits:

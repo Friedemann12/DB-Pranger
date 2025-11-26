@@ -17,6 +17,7 @@ import json
 from .predictor import DelayPredictor, create_features_from_transport_weather
 from .history import get_history_manager
 from .weather_client import get_current_weather, get_weather_impact_level
+from .segments import get_segments_with_coordinates
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -134,7 +135,8 @@ async def root():
             "statistics": {
                 "overview": "/stats/overview",
                 "by_line": "/stats/by-line",
-                "heatmap": "/stats/heatmap"
+                "heatmap": "/stats/heatmap",
+                "segments": "/stats/segments"
             },
             "live": {
                 "current": "/live/current",
@@ -341,6 +343,38 @@ async def get_stats_heatmap():
     history = get_history_manager()
     return {
         "data": history.get_heatmap_data(),
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.get("/stats/segments")
+async def get_stats_segments(
+    limit: int = Query(100, ge=1, le=500),
+    sort_by: str = Query("avg_delay", regex="^(avg_delay|max_delay|total_delay)$")
+):
+    """
+    Get delay statistics aggregated by route segment.
+    
+    Returns segments (start station -> end station) with:
+    - Average and max delay
+    - Total trips on this segment
+    - List of lines using this segment
+    - GPS coordinates for map visualization
+    
+    - **limit**: Maximum number of segments to return (default 100, max 500)
+    - **sort_by**: Sort metric - 'avg_delay' (default), 'max_delay', or 'total_delay'
+    """
+    history = get_history_manager()
+    
+    # Get aggregated segment data from Spark
+    segments = history.get_segments_with_delay(limit=limit, sort_by=sort_by)
+    
+    # Enrich with coordinates for map visualization
+    segments_with_coords = get_segments_with_coordinates(segments)
+    
+    return {
+        "segments": segments_with_coords,
+        "total": len(segments_with_coords),
         "timestamp": datetime.now().isoformat()
     }
 

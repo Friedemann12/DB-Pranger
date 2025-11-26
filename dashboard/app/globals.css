@@ -1736,3 +1736,392 @@ body {
     padding: 0 0.5rem;
   }
 }
+
+/* ============================================================================
+   Map Screen Styles (Clean Version)
+   ============================================================================ */
+
+.map-screen-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: #111;
+  overflow: hidden;
+}
+
+.map-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.map-loading,
+.map-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #888;
+  background: rgba(17, 17, 17, 0.9);
+  z-index: 20;
+}
+
+.map-loading .spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #333;
+  border-top-color: #888;
+  border-radius: 50%;
+  animation: mapspin 1s linear infinite;
+}
+
+@keyframes mapspin {
+  to { transform: rotate(360deg); }
+}
+
+/* Map Overlays */
+.map-overlay-title {
+  position: absolute;
+  top: 5rem; /* Unter dem Header */
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0,0,0,0.8);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.map-overlay-title small {
+  opacity: 0.6;
+  font-size: 0.7rem;
+  margin-left: 0.25rem;
+}
+
+/* Map Filter Controls */
+.map-overlay-controls {
+  position: absolute;
+  top: 5rem;
+  left: 14rem; /* Neben dem Titel */
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0,0,0,0.8);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.75rem;
+  z-index: 10;
+}
+
+.map-overlay-controls .control-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.map-overlay-controls label {
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.map-overlay-controls select {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.35rem 0.6rem;
+  padding-right: 1.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.4rem center;
+  transition: all 0.2s ease;
+}
+
+.map-overlay-controls select:hover {
+  background-color: rgba(40, 40, 40, 0.95);
+  border-color: #22c55e;
+}
+
+.maplibregl-ctrl-bottom-right 
+{display: none;}
+
+.map-overlay-controls select:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
+}
+
+.map-overlay-controls select option {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.map-overlay-controls select option:hover,
+.map-overlay-controls select option:checked {
+  background: #22c55e;
+  color: #000;
+}
+
+.map-overlay-controls input[type="range"] {
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  cursor: pointer;
+  accent-color: #22c55e;
+}
+
+@media (max-width: 800px) {
+  .map-overlay-controls {
+    top: 8rem;
+    left: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.map-overlay-legend {
+  position: absolute;
+  top: 5rem; /* Unter dem Header */
+  right: 6rem; /* Neben den MapLibre Controls */
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(0,0,0,0.8);
+  border-radius: 6px;
+  font-size: 0.65rem;
+  color: #fff;
+  z-index: 10;
+}
+
+.map-overlay-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.map-overlay-selected {
+  position: absolute;
+  top: 8rem; /* Unter Titel */
+  left: 1rem;
+  width: 240px;
+  padding: 0.75rem;
+  background: rgba(20,20,20,0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: #fff;
+  z-index: 10;
+}
+
+.map-overlay-selected .close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.map-overlay-selected .route {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  padding-right: 1.5rem;
+}
+
+.map-overlay-selected .stats {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.map-overlay-selected .stats > div {
+  text-align: center;
+}
+
+.map-overlay-selected .stats strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.map-overlay-selected .stats small {
+  font-size: 0.6rem;
+  opacity: 0.6;
+}
+
+.map-overlay-selected .lines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.map-overlay-selected .badge {
+  padding: 0.15rem 0.4rem;
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  font-size: 0.65rem;
+}
+
+/* Map Panel */
+.map-panel-toggle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1.25rem;
+  background: rgba(30,30,30,0.95);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  z-index: 15;
+}
+
+.map-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 40vh;
+  padding: 2.5rem 1rem 1rem;
+  background: rgba(20,20,20,0.95);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  overflow-y: auto;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.5rem;
+}
+
+.map-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.map-panel-item:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.map-panel-item.good { border-left: 3px solid #22c55e; }
+.map-panel-item.warning { border-left: 3px solid #eab308; }
+.map-panel-item.critical { border-left: 3px solid #ef4444; }
+
+.map-panel-item .rank {
+  font-size: 0.65rem;
+  opacity: 0.5;
+  min-width: 20px;
+}
+
+.map-panel-item .name {
+  flex: 1;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-panel-item .delay {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* MapLibre Controls - Dark Theme */
+.maplibregl-ctrl-top-right {
+  top: 5rem !important; /* Unter dem Header */
+}
+
+.maplibregl-ctrl-group {
+  background: rgba(30, 30, 30, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.maplibregl-ctrl-group button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.maplibregl-ctrl-group button:last-child {
+  border-bottom: none !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.maplibregl-ctrl-group button span {
+  filter: invert(1);
+}
+
+/* MapLibre Popup - Dark Theme */
+.maplibregl-popup-content {
+  background: rgba(20, 20, 20, 0.95) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.maplibregl-popup-tip {
+  border-top-color: rgba(20, 20, 20, 0.95) !important;
+}
+
+/* Map Screen Responsive */
+@media (max-width: 640px) {
+  .map-overlay-legend {
+    display: none;
+  }
+  
+  .map-overlay-selected {
+    top: auto;
+    bottom: 3.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+  }
+  
+  .map-panel {
+    grid-template-columns: 1fr;
+  }
+}

@@ -214,6 +214,34 @@ export interface JourneyDetailResponse {
   final_delay: number;
 }
 
+// Segment Map Types
+export type SegmentSortBy = "avg_delay" | "max_delay" | "total_delay";
+
+export interface SegmentData {
+  start_station: string;
+  start_station_key: string;
+  end_station: string;
+  end_station_key: string;
+  start_lat: number | null;
+  start_lon: number | null;
+  end_lat: number | null;
+  end_lon: number | null;
+  avg_delay: number;
+  max_delay: number;
+  min_delay: number;
+  total_delay: number;  // Summierte Verspätung in Minuten
+  total_trips: number;
+  delayed_percentage: number;
+  lines: string[];
+  status: "good" | "warning" | "critical";
+}
+
+export interface SegmentsResponse {
+  segments: SegmentData[];
+  total: number;
+  timestamp: string;
+}
+
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -295,6 +323,15 @@ export async function getJourneyDetail(
   );
 }
 
+/**
+ * Get segment statistics with coordinates for map
+ */
+export async function getSegmentsStats(
+  limit: number = 100
+): Promise<SegmentsResponse> {
+  return fetchAPI<SegmentsResponse>(`/stats/segments?limit=${limit}`);
+}
+
 // ============================================================================
 // SWR Fetchers
 // ============================================================================
@@ -313,6 +350,8 @@ export const API_ENDPOINTS = {
   statsOverview: "/stats/overview",
   statsByLine: "/stats/by-line",
   heatmap: "/stats/heatmap",
+  segmentsStats: (limit = 100, sortBy: SegmentSortBy = "avg_delay") => 
+    `/stats/segments?limit=${limit}&sort_by=${sortBy}`,
   delaysOverTime: (hours = 24, bucket = 60) => 
     `/history/delays?hours=${hours}&bucket_minutes=${bucket}`,
   journeysByLine: (line: string, limit = 50) =>

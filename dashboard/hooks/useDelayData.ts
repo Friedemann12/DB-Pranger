@@ -12,6 +12,8 @@ import {
   HeatmapResponse,
   JourneysByLineResponse,
   JourneyDetailResponse,
+  SegmentsResponse,
+  SegmentSortBy,
 } from "@/lib/api";
 
 /**
@@ -188,6 +190,30 @@ export function useJourneyDetail(journeyId: string | null) {
   return {
     journey: data,
     segments: data?.segments ?? [],
+    isLoading,
+    isError: !!error,
+    refresh: mutate,
+  };
+}
+
+/**
+ * Hook for segment statistics with coordinates for map
+ */
+export function useSegmentsStats(limit: number = 100, sortBy: SegmentSortBy = "avg_delay") {
+  const { data, error, isLoading, mutate } = useSWR<SegmentsResponse>(
+    API_ENDPOINTS.segmentsStats(limit, sortBy),
+    fetcher,
+    {
+      refreshInterval: 60000, // Refresh every 60 seconds
+      revalidateOnFocus: false, // Don't revalidate on focus to keep map stable
+      dedupingInterval: 60000, // Dedupe requests within 60 seconds
+    }
+  );
+
+  return {
+    segments: data?.segments ?? [],
+    total: data?.total ?? 0,
+    timestamp: data?.timestamp,
     isLoading,
     isError: !!error,
     refresh: mutate,

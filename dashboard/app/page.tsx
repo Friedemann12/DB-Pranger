@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useDashboardData } from "@/hooks/useDelayData";
 import { LineStats } from "@/lib/api";
-import { OverviewScreen, OverviewScreenSkeleton, PredictionsScreen, HeatmapScreen, AllLinesScreen } from "./components/screens";
+import { OverviewScreen, OverviewScreenSkeleton, PredictionsScreen, HeatmapScreen, AllLinesScreen, SegmentsMapScreen } from "./components/screens";
 import { ShameboardScreen } from "./components/screens/ShameboardScreen";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { TrainIcon } from "./components/icons";
 
-const TOTAL_SCREENS = 5;
+const TOTAL_SCREENS = 6;
 const SCROLL_THRESHOLD = 80;
 const MIN_LOCK_TIME = 75; // Minimum lock after navigation
 const QUIET_TIME = 20; // Time without events to unlock
@@ -21,12 +21,16 @@ export default function Dashboard() {
   const lockStartTime = useRef(0);
   const unlockTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const sortedLines = [...(lines.lines || [])].sort(
-    (a, b) => b.delay_minutes - a.delay_minutes
+  const sortedLines = useMemo(
+    () => [...(lines.lines || [])].sort((a, b) => b.delay_minutes - a.delay_minutes),
+    [lines.lines]
   );
 
-  const lineStatsMap = new Map<string, LineStats>();
-  sortedLines.forEach(line => lineStatsMap.set(line.line, line));
+  const lineStatsMap = useMemo(() => {
+    const map = new Map<string, LineStats>();
+    sortedLines.forEach((line) => map.set(line.line, line));
+    return map;
+  }, [sortedLines]);
 
   const scheduleUnlock = useCallback(() => {
     if (unlockTimeout.current) clearTimeout(unlockTimeout.current);
@@ -70,10 +74,12 @@ export default function Dashboard() {
       const target = e.target as HTMLElement;
       const isInModal = target.closest(".modal-overlay");
       const isInScrollableList = target.closest(".journeys-list");
+      const isInSegmentsList = target.closest(".segments-list, .segments-panel");
       const isInCarousel = target.closest(".carousel-container");
+      const isInMap = target.closest(".maplibregl-map, .fullscreen-map");
       
-      // Let modals and scrollable lists handle their own scrolling
-      if (isInModal || isInScrollableList) return;
+      // Let modals, scrollable lists, and maps handle their own scrolling/zooming
+      if (isInModal || isInScrollableList || isInSegmentsList || isInMap) return;
       
       // In carousels: let horizontal scroll through, capture vertical for page nav
       if (isInCarousel && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -160,6 +166,7 @@ export default function Dashboard() {
             lineStatsMap={lineStatsMap}
           />
           <HeatmapScreen />
+          <SegmentsMapScreen />
           <AllLinesScreen lines={sortedLines} />
           <ShameboardScreen lines={sortedLines} stats={stats.stats} />
         </div>
