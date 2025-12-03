@@ -6,11 +6,14 @@ Can be used standalone or integrated with a web framework.
 """
 
 import json
+import logging
 import joblib
 import numpy as np
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Union
+
+logger = logging.getLogger(__name__)
 
 
 class DelayPredictor:
@@ -76,11 +79,13 @@ class DelayPredictor:
         if self.regressor is None and self.classifier is None:
             raise FileNotFoundError(f"No models found in {self.model_dir}")
         
-        print(f"Loaded models from {self.model_dir}")
+        logger.info("Loaded models from %s", self.model_dir)
         if self.regressor:
-            print(f"  - Regressor: MAE={self.reg_metadata.get('metrics', {}).get('mae', 'N/A'):.2f} min")
+            mae = self.reg_metadata.get("metrics", {}).get("mae", "N/A")
+            logger.info("  Regressor: MAE=%.2f min", mae if isinstance(mae, (int, float)) else 0)
         if self.classifier:
-            print(f"  - Classifier: F1={self.clf_metadata.get('metrics', {}).get('f1', 'N/A'):.3f}")
+            f1 = self.clf_metadata.get("metrics", {}).get("f1", "N/A")
+            logger.info("  Classifier: F1=%.3f", f1 if isinstance(f1, (int, float)) else 0)
     
     def _prepare_features(self, raw_features: Dict) -> np.ndarray:
         """

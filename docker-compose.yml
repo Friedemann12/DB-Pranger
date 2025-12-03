@@ -1,18 +1,80 @@
-# Docker Compose for local testing
+# Docker Compose for DB Pranger - HVV Delay Prediction System
 # Run with: docker-compose up
-
-version: '3.8'
+#
+# Services:
+#   - dashboard: Next.js frontend (port 3000)
+#   - api: FastAPI backend with PySpark (port 8000)
+#   - transport-collector: Data collection service
+#
+# Note: API runs Spark in local mode. For production, connect to a Spark cluster.
 
 services:
+  # ==========================================================================
+  # Next.js Dashboard
+  # ==========================================================================
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: db-pranger-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    networks:
+      - db-pranger-network
+
+  # ==========================================================================
+  # FastAPI Backend with PySpark
+  # ==========================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: db-pranger-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Clean mount paths: host -> /db_pranger/...
+      - ./app/model:/db_pranger/app/model:ro
+      - ./data:/db_pranger/data:ro
+      - ./app/api/cache:/db_pranger/app/api/cache
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_LOCAL_DIRS=/tmp/spark
+      - GTI_USER=${GTI_USER}
+      - GTI_PASSWORD=${GTI_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    networks:
+      - db-pranger-network
+
+  # ==========================================================================
+  # Transport Data Collector
+  # ==========================================================================
   transport-collector:
     build: .
-    container_name: geofox-collector
+    container_name: db-pranger-collector
     restart: unless-stopped
     environment:
       - GTI_USER=${GTI_USER}
       - GTI_PASSWORD=${GTI_PASSWORD}
     volumes:
-      # Persist collected data to host
       - ./data:/app/data
+    networks:
+      - db-pranger-network
 
-
+networks:
+  db-pranger-network:
+    driver: bridge
